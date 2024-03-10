@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task_22.5</title>
+  <style>
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .message-input-container {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .message-input {
+      flex: 1;
+      margin-right: 5px;
+    }
+
+    .send-button,
+    .geo-button {
+      width: 100px;
+    }
+
+    .chat-messages {
+      height: 300px;
+      width: 100%;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .message {
+      margin-bottom: 5px;
+    }
+
+    .message.me {
+      text-align: right;
+    }
+
+    .message.server {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="message-input-container">
+      <input type="text" class="message-input" placeholder="Ввести сообщение">
+      <button class="send-button">Отправить</button>
+      <button class="geo-button">Геолокация</button>
+    </div>
+    <div class="chat-messages"></div>
+  </div>
+
+  <script>
+    const messageInput = document.querySelector('.message-input');
+    const sendButton = document.querySelector('.send-button');
+    const geoButton = document.querySelector('.geo-button');
+    const chatMessages = document.querySelector('.chat-messages');
+
+    const ws = new WebSocket('wss://echo-ws-service.herokuapp.com/');
+
+    function addMessageToChat(message, className) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      messageElement.classList.add('message', className);
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (message !== '') {
+        ws.send(message);
+        addMessageToChat(message, 'me');
+        messageInput.value = '';
+      }
+    });
+
+    geoButton.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const { latitude, longitude } = position.coords;
+          const geoLink = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+          addMessageToChat(`Ваша гео-локация: ${geoLink}`, 'me');
+        }, error => {
+          console.error('Ошибка при получении гео-локации:', error);
+          addMessageToChat('Информация о гео-локации недоступна', 'me');
+        });
+      } else {
+        addMessageToChat('Гео-локация не поддерживается в вашем браузере', 'me');
+      }
+    });
+
+    ws.addEventListener('message', event => {
+      const message = event.data;
+      addMessageToChat(`Эхо-сервер: ${message}`, 'server');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task_23.3</title>
+  <style>
+    .button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .user-info {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button class="button user-info__button">Получить информацию</button>
+  <p class="user-info"></p>
+
+  <script async>
+    document.addEventListener('DOMContentLoaded', function() {
+      const button = document.querySelector('.user-info__button');
+      const userInfo = document.querySelector('.user-info');
+
+      button.addEventListener('click', function() {
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const screenSizeInfo = `Ширина экрана: ${screenWidth}px, Высота экрана: ${screenHeight}px`;
+
+        // Получение координат местоположения пользователя
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const locationInfo = `Широта: ${latitude}, Долгота: ${longitude}`;
+            userInfo.textContent = `${screenSizeInfo}. ${locationInfo}`;
+          }, function(error) {
+            
+
+            userInfo.textContent = `${screenSizeInfo}. Информация о местоположении недоступна`;
+          });
+        } else {
+          userInfo.textContent = `${screenSizeInfo}. Информация о местоположении недоступна`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
